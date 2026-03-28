@@ -280,6 +280,41 @@ h1 {
 
 .about-card strong { color: var(--text); }
 
+/* ========== GitHub Stats ========== */
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+
+.stats-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: border-color var(--transition), transform var(--transition);
+}
+
+.stats-card:hover {
+  border-color: rgba(124,106,247,0.4);
+  transform: translateY(-3px);
+}
+
+.stats-card--full {
+  grid-column: 1 / -1;
+}
+
+.stats-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 6px;
+}
+
 /* ========== Links ========== */
 .links-grid {
   display: flex;
@@ -358,4 +393,5 @@ footer {
   h1 { font-size: 1.9rem; }
   .tagline { font-size: 0.95rem; }
   .about-grid { grid-template-columns: 1fr; }
+  .stats-grid { grid-template-columns: 1fr; }
 }
