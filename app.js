@@ -35,3 +35,20 @@ if (label) {
   };
   setTimeout(type, 600);
 }
+
+// Discord copy-to-clipboard
+document.querySelectorAll('.link-card--copy').forEach(card => {
+  card.addEventListener('click', () => {
+    const username = card.dataset.copy;
+    navigator.clipboard.writeText(username).then(() => {
+      const span = card.querySelector('span');
+      const original = span.textContent;
+      span.textContent = 'copied!';
+      card.style.borderColor = 'rgba(94,234,212,0.6)';
+      setTimeout(() => {
+        span.textContent = original;
+        card.style.borderColor = '';
+      }, 1800);
+    });
+  });
+});
