@@ -12,6 +12,10 @@
 </head>
 <body>
 
+  <!-- Custom cursor -->
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-trail" id="cursorTrail"></div>
+
   <div class="bg-grid"></div>
   <div class="noise"></div>
 
@@ -27,7 +31,7 @@
         <div class="hero-text">
           <p class="label mono">jakub.horak@dev ~</p>
           <h1>Jakub Horák <span class="alias">/ Tevuori</span></h1>
-          <p class="tagline">Computer Science student &amp; systems developer.<br/>Passionate about low-level programming, algorithms, and clean code.</p>
+          <p class="tagline"><span id="typing-target"></span></p>
           <div class="badges">
             <span class="badge">C / C++</span>
             <span class="badge">Assembly x86</span>
@@ -66,6 +70,82 @@
           <h3>Linux &amp; Tools</h3>
           <p>Daily-driving <strong>Fedora Linux</strong>. Comfortable with the terminal, CMake, Doxygen, Git workflows, and shell scripting.</p>
         </div>
+      </div>
+    </section>
+
+    <!-- Skills -->
+    <section class="section" id="skills">
+      <h2 class="section-title"><span class="mono accent">//</span> Skills</h2>
+      <div class="skills-grid">
+
+        <div class="skill-group">
+          <h3 class="skill-group-title">Languages</h3>
+          <div class="skill-list">
+            <div class="skill-item">
+              <span class="skill-name">C / C++</span>
+              <div class="skill-bar"><div class="skill-fill" style="--w:88%"></div></div>
+            </div>
+            <div class="skill-item">
+              <span class="skill-name">Assembly x86</span>
+              <div class="skill-bar"><div class="skill-fill" style="--w:72%"></div></div>
+            </div>
+            <div class="skill-item">
+              <span class="skill-name">Java</span>
+              <div class="skill-bar"><div class="skill-fill" style="--w:70%"></div></div>
+            </div>
+            <div class="skill-item">
+              <span class="skill-name">C#</span>
+              <div class="skill-bar"><div class="skill-fill" style="--w:65%"></div></div>
+            </div>
+            <div class="skill-item">
+              <span class="skill-name">TypeScript</span>
+              <div class="skill-bar"><div class="skill-fill" style="--w:55%"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="skill-group">
+          <h3 class="skill-group-title">Tools &amp; OS</h3>
+          <div class="skill-list">
+            <div class="skill-item">
+              <span class="skill-name">Linux / Fedora</span>
+              <div class="skill-bar"><div class="skill-fill" style="--w:90%"></div></div>
+            </div>
+            <div class="skill-item">
+              <span class="skill-name">Git / GitHub</span>
+              <div class="skill-bar"><div class="skill-fill" style="--w:85%"></div></div>
+            </div>
+            <div class="skill-item">
+              <span class="skill-name">Bash / Shell</span>
+              <div class="skill-bar"><div class="skill-fill" style="--w:80%"></div></div>
+            </div>
+            <div class="skill-item">
+              <span class="skill-name">CMake</span>
+              <div class="skill-bar"><div class="skill-fill" style="--w:68%"></div></div>
+            </div>
+            <div class="skill-item">
+              <span class="skill-name">Docker</span>
+              <div class="skill-bar"><div class="skill-fill" style="--w:50%"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="skill-group">
+          <h3 class="skill-group-title">Concepts</h3>
+          <div class="skill-tags">
+            <span class="stag">Algorithms</span>
+            <span class="stag">Data Structures</span>
+            <span class="stag">OOP</span>
+            <span class="stag">TDD</span>
+            <span class="stag">Graph Theory</span>
+            <span class="stag">OS Internals</span>
+            <span class="stag">Memory Management</span>
+            <span class="stag">Discrete Math</span>
+            <span class="stag">Linear Algebra</span>
+            <span class="stag">FPGA / VHDL</span>
+          </div>
+        </div>
+
       </div>
     </section>
 
@@ -138,6 +218,34 @@
         <div class="stats-card stats-card--full">
           <img src="https://github-readme-activity-graph.vercel.app/graph?username=tevuori&bg_color=00000000&color=7c6af7&line=5eead4&point=7c6af7&area=true&area_color=7c6af7&hide_border=true&custom_title=Contribution%20Activity" alt="Contribution Graph" class="stats-img" loading="lazy" />
         </div>
+      </div>
+    </section>
+
+    <!-- Contact -->
+    <section class="section" id="contact">
+      <h2 class="section-title"><span class="mono accent">//</span> Contact</h2>
+      <div class="contact-wrap">
+        <p class="contact-desc">Got a project idea, question, or just want to say hi? Drop me a message.</p>
+        <form class="contact-form" action="https://formspree.io/f/xwpovqnb" method="POST">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="name" class="form-label">Name</label>
+              <input type="text" id="name" name="name" class="form-input" placeholder="Your name" required />
+            </div>
+            <div class="form-group">
+              <label for="email" class="form-label">Email</label>
+              <input type="email" id="email" name="email" class="form-input" placeholder="your@email.com" required />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="message" class="form-label">Message</label>
+            <textarea id="message" name="message" class="form-input form-textarea" placeholder="What's on your mind?" rows="5" required></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary form-submit">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4 20-7z"/><path d="M22 2 11 13"/></svg>
+            Send message
+          </button>
+        </form>
       </div>
     </section>
 
