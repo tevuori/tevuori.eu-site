@@ -646,12 +646,18 @@
       }
 
       // --- UI helpers ---
-      function formatDate(dateStr) {
-        if (!dateStr) return '—';
-        var d = new Date(dateStr);
-        if (isNaN(d.getTime())) return dateStr;
+      function formatDate(val) {
+        if (!val) return '—';
+        // KV stores timestamp as ms (Date.now()), handle both number and ISO string
+        var d = typeof val === 'number' ? new Date(val) : new Date(val);
+        if (isNaN(d.getTime())) return String(val);
         return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) +
           ' ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+      }
+
+      function getDeviceDate(device) {
+        // Support all possible field names: created (KV Worker), createdAt, created_at, date
+        return device.created || device.createdAt || device.created_at || device.date || null;
       }
 
       function statusClass(status) {
@@ -687,7 +693,7 @@
 
         var date = document.createElement('span');
         date.className = 'device-date';
-        date.textContent = 'Created: ' + formatDate(device.createdAt || device.created_at || device.date);
+        date.textContent = 'Created: ' + formatDate(getDeviceDate(device));
 
         meta.appendChild(badge);
         meta.appendChild(date);
