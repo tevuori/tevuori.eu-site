@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ares Device Manager — Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    /* ========== Reset & Base ========== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0d0f;
+      --surface: #141417;
+      --surface-2: #1c1c21;
+      --border: #2a2a30;
+      --accent: #7c6af7;
+      --accent-2: #5eead4;
+      --text: #e8e8ef;
+      --text-muted: #72727a;
+      --text-dim: #48484f;
+      --font: 'Inter', sans-serif;
+      --mono: 'JetBrains Mono', monospace;
+      --radius: 14px;
+      --radius-sm: 8px;
+      --transition: 0.22s cubic-bezier(0.4,0,0.2,1);
+      --success: #22c55e;
+      --warning: #eab308;
+      --danger: #ef4444;
+    }
+
+    :root.light {
+      --bg: #f5f5f8;
+      --surface: #ffffff;
+      --surface-2: #eaeaef;
+      --border: #d4d4da;
+      --text: #1a1a24;
+      --text-muted: #5e5e6a;
+      --text-dim: #8e8e98;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 16px;
+      line-height: 1.65;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .mono { font-family: var(--mono); }
+    .accent { color: var(--accent); }
+
+    /* ========== Background Effects ========== */
+    .bg-grid {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background-image:
+        linear-gradient(rgba(124,106,247,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(124,106,247,0.04) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+    }
+
+    .noise {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      opacity: 0.018;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 256px 256px;
+      pointer-events: none;
+    }
+
+    main {
+      position: relative;
+      z-index: 1;
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ========== Typography ========== */
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 2.5rem;
+      letter-spacing: -0.02em;
+    }
+
+    /* ========== Buttons ========== */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.7rem 1.4rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.9rem;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all var(--transition);
+      border: none;
+      cursor: pointer;
+      font-family: var(--font);
+    }
+
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: #9183f7; transform: translateY(-2px); box-shadow: 0 8px 28px rgba(124,106,247,0.35); }
+    .btn-ghost { background: transparent; color: var(--text-muted); border: 1px solid var(--border); }
+    .btn-ghost:hover { border-color: var(--text-muted); color: var(--text); transform: translateY(-2px); }
+
+    .btn-success { background: var(--success); color: #fff; }
+    .btn-success:hover { background: #16a34a; transform: translateY(-2px); box-shadow: 0 8px 28px rgba(34,197,94,0.35); }
+    .btn-danger { background: var(--danger); color: #fff; }
+    .btn-danger:hover { background: #dc2626; transform: translateY(-2px); box-shadow: 0 8px 28px rgba(239,68,68,0.35); }
+    .btn-sm { padding: 0.4rem 0.85rem; font-size: 0.78rem; }
+
+    .btn:disabled {
+      opacity: 0.5;
+      pointer-events: none;
+      transform: none !important;
+      box-shadow: none !important;
+    }
+
+    /* ========== Theme Toggle ========== */
+    .theme-toggle {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      width: 38px;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: all var(--transition);
+      padding: 0;
+    }
+    .theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
+    .theme-toggle svg { width: 18px; height: 18px; }
+
+    /* ========== Login Screen ========== */
+    .login-wrap {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .login-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2.5rem 2rem;
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+
+    .login-icon {
+      width: 56px;
+      height: 56px;
+      margin: 0 auto 1.25rem;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+    }
+
+    .login-icon svg { width: 26px; height: 26px; }
+
+    .login-card h1 {
+      font-size: 1.35rem;
+      font-weight: 600;
+      margin-bottom: 0.3rem;
+      letter-spacing: -0.02em;
+    }
+
+    .login-card .label {
+      font-size: 0.78rem;
+      color: var(--accent);
+      letter-spacing: 0.05em;
+      margin-bottom: 1.75rem;
+    }
+
+    .login-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .form-input {
+      display: block;
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.7rem 1rem;
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color var(--transition), box-shadow var(--transition);
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    .form-input::placeholder { color: var(--text-dim); }
+
+    .form-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(124,106,247,0.12);
+    }
+
+    .login-error {
+      margin-top: 0.75rem;
+      font-size: 0.82rem;
+      color: var(--danger);
+      display: none;
+    }
+
+    .login-error.visible { display: block; }
+
+    /* ========== Admin Header ========== */
+    .admin-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .header-left h1 {
+      font-size: 1.35rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.15rem;
+    }
+
+    .header-left .label {
+      font-size: 0.75rem;
+      color: var(--accent);
+      letter-spacing: 0.05em;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* ========== Toolbar ========== */
+    .admin-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .device-count {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      font-family: var(--mono);
+    }
+
+    /* ========== Device Grid ========== */
+    .device-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+
+    .device-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.35rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+      transition: border-color var(--transition), transform var(--transition);
+    }
+
+    .device-card:hover { border-color: rgba(124,106,247,0.4); }
+
+    .device-info {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .device-name {
+      font-family: var(--mono);
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text);
+      word-break: break-all;
+    }
+
+    .device-meta {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .device-date {
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      font-family: var(--mono);
+    }
+
+    .device-actions {
+      display: flex;
+      gap: 0.5rem;
+      flex-shrink: 0;
+    }
+
+    /* ========== Status Badges ========== */
+    .status-badge {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      padding: 0.22rem 0.65rem;
+      border-radius: 100px;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .status-badge::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .status-pending {
+      background: rgba(234,179,8,0.12);
+      color: var(--warning);
+      border: 1px solid rgba(234,179,8,0.3);
+    }
+    .status-pending::before { background: var(--warning); }
+
+    .status-approved {
+      background: rgba(34,197,94,0.12);
+      color: var(--success);
+      border: 1px solid rgba(34,197,94,0.3);
+    }
+    .status-approved::before { background: var(--success); }
+
+    .status-revoked {
+      background: rgba(239,68,68,0.12);
+      color: var(--danger);
+      border: 1px solid rgba(239,68,68,0.3);
+    }
+    .status-revoked::before { background: var(--danger); }
+
+    /* ========== Empty / Loading / Error States ========== */
+    .state-message {
+      text-align: center;
+      padding: 3rem 1.5rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+
+    .state-message .icon {
+      font-size: 2rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .state-message p {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 100;
+      padding: 0.7rem 1.4rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      font-weight: 500;
+      transition: opacity 0.3s, transform 0.3s;
+      opacity: 0;
+      transform: translateX(-50%) translateY(10px);
+      pointer-events: none;
+    }
+
+    .toast.visible {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .toast-success { background: #16a34a; color: #fff; }
+    .toast-error { background: #dc2626; color: #fff; }
+
+    /* ========== Footer ========== */
+    footer {
+      text-align: center;
+      padding: 2.5rem 0 0;
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      border-top: 1px solid var(--border);
+      margin-top: auto;
+    }
+
+    /* ========== Responsive ========== */
+    @media (max-width: 600px) {
+      main { padding: 1.5rem 1.25rem; }
+      .login-card { padding: 2rem 1.5rem; }
+      .device-card { padding: 1.1rem; }
+      .device-actions { width: 100%; }
+      .device-actions .btn { flex: 1; justify-content: center; }
+      .admin-header { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-grid"></div>
+  <div class="noise"></div>
+
+  <main>
+    <!-- Login Screen -->
+    <div id="login-screen" class="login-wrap">
+      <div class="login-card">
+        <div class="login-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><circle cx="12" cy="16" r="1"/></svg>
+        </div>
+        <h1>Ares Device Manager</h1>
+        <p class="label mono">admin@ares ~</p>
+        <form id="login-form" class="login-form" autocomplete="off">
+          <input
+            type="password"
+            id="password-input"
+            class="form-input"
+            placeholder="Enter admin password"
+            autofocus
+            required
+          />
+          <button type="submit" class="btn btn-primary" id="login-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg>
+            Authenticate
+          </button>
+        </form>
+        <p id="login-error" class="login-error mono"></p>
+      </div>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div id="admin-screen" style="display:none;">
+      <header class="admin-header">
+        <div class="header-left">
+          <h1>Ares Device Manager</h1>
+          <p class="label mono">admin@ares ~</p>
+        </div>
+        <div class="header-right">
+          <button class="theme-toggle" id="theme-toggle" title="Toggle theme" aria-label="Toggle dark/light mode">
+            <svg id="theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+            <svg id="theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          </button>
+          <button class="btn btn-ghost btn-sm" id="logout-btn">Logout</button>
+        </div>
+      </header>
+
+      <div class="admin-toolbar">
+        <span id="device-count" class="device-count mono"></span>
+        <button class="btn btn-ghost btn-sm" id="refresh-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+          Refresh
+        </button>
+      </div>
+
+      <div id="device-list"></div>
+
+      <div id="loading-state" class="state-message">
+        <div class="spinner"></div>
+        <p style="margin-top:1rem;">Loading devices…</p>
+      </div>
+
+      <footer>
+        <p class="mono">Jakub Horák &mdash; tevuori.eu &mdash; 2026</p>
+      </footer>
+    </div>
+  </main>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    (function () {
+      const API_BASE = 'https://tevuori.eu/api';
+
+      // --- DOM refs ---
+      const loginScreen = document.getElementById('login-screen');
+      const adminScreen = document.getElementById('admin-screen');
+      const loginForm = document.getElementById('login-form');
+      const passwordInput = document.getElementById('password-input');
+      const loginBtn = document.getElementById('login-btn');
+      const loginError = document.getElementById('login-error');
+      const logoutBtn = document.getElementById('logout-btn');
+      const themeToggle = document.getElementById('theme-toggle');
+      const themeIconSun = document.getElementById('theme-icon-sun');
+      const themeIconMoon = document.getElementById('theme-icon-moon');
+      const deviceList = document.getElementById('device-list');
+      const deviceCount = document.getElementById('device-count');
+      const refreshBtn = document.getElementById('refresh-btn');
+      const loadingState = document.getElementById('loading-state');
+      const toast = document.getElementById('toast');
+
+      let toastTimer = null;
+
+      // --- Theme ---
+      function applyTheme(light) {
+        if (light) {
+          document.documentElement.classList.add('light');
+          themeIconSun.style.display = 'block';
+          themeIconMoon.style.display = 'none';
+        } else {
+          document.documentElement.classList.remove('light');
+          themeIconSun.style.display = 'none';
+          themeIconMoon.style.display = 'block';
+        }
+      }
+
+      const savedTheme = localStorage.getItem('ares-admin-theme');
+      applyTheme(savedTheme === 'light');
+
+      themeToggle.addEventListener('click', function () {
+        const isLight = document.documentElement.classList.contains('light');
+        const next = !isLight;
+        applyTheme(next);
+        localStorage.setItem('ares-admin-theme', next ? 'light' : 'dark');
+      });
+
+      // --- Toast ---
+      function showToast(message, type) {
+        if (toastTimer) clearTimeout(toastTimer);
+        toast.textContent = message;
+        toast.className = 'toast ' + (type === 'error' ? 'toast-error' : 'toast-success') + ' visible';
+        toastTimer = setTimeout(function () {
+          toast.classList.remove('visible');
+        }, 2500);
+      }
+
+      // --- Auth ---
+      function getPassword() {
+        return sessionStorage.getItem('ares-admin-password');
+      }
+
+      function setPassword(pw) {
+        sessionStorage.setItem('ares-admin-password', pw);
+      }
+
+      function clearPassword() {
+        sessionStorage.removeItem('ares-admin-password');
+      }
+
+      function authHeaders() {
+        var pw = getPassword();
+        if (!pw) return {};
+        return { 'X-Admin-Password': pw };
+      }
+
+      // --- API helpers ---
+      async function apiRequest(method, path, body) {
+        var headers = authHeaders();
+        if (!headers['X-Admin-Password']) {
+          throw new Error('No password set');
+        }
+        Object.assign(headers, {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        });
+        var opts = { method: method, headers: headers };
+        if (body) {
+          opts.body = JSON.stringify(body);
+        }
+        var res = await fetch(API_BASE + path, opts);
+        if (!res.ok) {
+          if (res.status === 401 || res.status === 403) {
+            clearPassword();
+            showLogin();
+            throw new Error('Authentication failed. Please log in again.');
+          }
+          var text = '';
+          try { text = await res.text(); } catch (_) {}
+          throw new Error('Request failed (' + res.status + ')' + (text ? ': ' + text : ''));
+        }
+        if (res.status === 204) return null;
+        var ct = res.headers.get('content-type') || '';
+        if (ct.includes('application/json')) {
+          return res.json();
+        }
+        return res.text();
+      }
+
+      function fetchDevices() {
+        return apiRequest('GET', '/admin/devices');
+      }
+
+      function approveDevice(token) {
+        return apiRequest('POST', '/admin/approve', { token: token });
+      }
+
+      function revokeDevice(token) {
+        return apiRequest('POST', '/admin/revoke', { token: token });
+      }
+
+      // --- UI helpers ---
+      function formatDate(dateStr) {
+        if (!dateStr) return '—';
+        var d = new Date(dateStr);
+        if (isNaN(d.getTime())) return dateStr;
+        return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) +
+          ' ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+      }
+
+      function statusClass(status) {
+        var s = (status || '').toLowerCase();
+        if (s === 'approved') return 'status-approved';
+        if (s === 'revoked') return 'status-revoked';
+        return 'status-pending';
+      }
+
+      function statusLabel(status) {
+        if (!status) return 'Pending';
+        return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
+      }
+
+      // --- Device card ---
+      function createDeviceCard(device) {
+        var card = document.createElement('div');
+        card.className = 'device-card';
+
+        var info = document.createElement('div');
+        info.className = 'device-info';
+
+        var name = document.createElement('span');
+        name.className = 'device-name mono';
+        name.textContent = device.name || device.token || 'Unknown device';
+
+        var meta = document.createElement('div');
+        meta.className = 'device-meta';
+
+        var badge = document.createElement('span');
+        badge.className = 'status-badge ' + statusClass(device.status);
+        badge.textContent = statusLabel(device.status);
+
+        var date = document.createElement('span');
+        date.className = 'device-date';
+        date.textContent = 'Created: ' + formatDate(device.createdAt || device.created_at || device.date);
+
+        meta.appendChild(badge);
+        meta.appendChild(date);
+        info.appendChild(name);
+        info.appendChild(meta);
+
+        var actions = document.createElement('div');
+        actions.className = 'device-actions';
+
+        var s = (device.status || '').toLowerCase();
+
+        if (s !== 'approved') {
+          var approveBtn = document.createElement('button');
+          approveBtn.className = 'btn btn-success btn-sm';
+          approveBtn.textContent = 'Approve';
+          approveBtn.addEventListener('click', function () { handleAction('approve', device, approveBtn); });
+          actions.appendChild(approveBtn);
+        }
+
+        if (s !== 'revoked') {
+          var revokeBtn = document.createElement('button');
+          revokeBtn.className = 'btn btn-danger btn-sm';
+          revokeBtn.textContent = 'Revoke';
+          revokeBtn.addEventListener('click', function () { handleAction('revoke', device, revokeBtn); });
+          actions.appendChild(revokeBtn);
+        }
+
+        card.appendChild(info);
+        card.appendChild(actions);
+
+        return card;
+      }
+
+      // --- Action handler ---
+      async function handleAction(action, device, clickedBtn) {
+        var token = device.token || device.name;
+        if (!token) {
+          showToast('Device token not found.', 'error');
+          return;
+        }
+
+        var actionBtns = clickedBtn.parentElement.querySelectorAll('button');
+        actionBtns.forEach(function (b) { b.disabled = true; });
+        var originalText = clickedBtn.textContent;
+        clickedBtn.textContent = action === 'approve' ? 'Approving…' : 'Revoking…';
+
+        try {
+          if (action === 'approve') {
+            await approveDevice(token);
+          } else {
+            await revokeDevice(token);
+          }
+          showToast('Device ' + (action === 'approve' ? 'approved' : 'revoked') + ' successfully.', 'success');
+          await loadDevices();
+        } catch (err) {
+          showToast(err.message || 'Action failed.', 'error');
+          actionBtns.forEach(function (b) { b.disabled = false; });
+          clickedBtn.textContent = originalText;
+        }
+      }
+
+      // --- Load devices ---
+      async function loadDevices() {
+        deviceList.innerHTML = '';
+        deviceCount.textContent = '';
+        loadingState.style.display = 'block';
+
+        try {
+          var data = await fetchDevices();
+          loadingState.style.display = 'none';
+
+          var devices = Array.isArray(data) ? data : (data && data.devices ? data.devices : []);
+
+          if (devices.length === 0) {
+            deviceList.innerHTML = '<div class="state-message"><div class="icon">📭</div><p>No devices found.</p></div>';
+            deviceCount.textContent = '0 devices';
+            return;
+          }
+
+          deviceCount.textContent = devices.length + ' device' + (devices.length !== 1 ? 's' : '');
+
+          var fragment = document.createDocumentFragment();
+          devices.forEach(function (device) {
+            fragment.appendChild(createDeviceCard(device));
+          });
+          deviceList.appendChild(fragment);
+        } catch (err) {
+          loadingState.style.display = 'none';
+          if (!getPassword()) return; // already redirected to login
+          deviceList.innerHTML = '<div class="state-message"><div class="icon">⚠️</div><p>' + err.message + '</p><button class="btn btn-ghost btn-sm" id="retry-btn">Retry</button></div>';
+          var retryBtn = document.getElementById('retry-btn');
+          if (retryBtn) {
+            retryBtn.addEventListener('click', loadDevices);
+          }
+        }
+      }
+
+      // --- Login / Logout ---
+      function showLogin() {
+        loginScreen.style.display = '';
+        adminScreen.style.display = 'none';
+        passwordInput.value = '';
+      }
+
+      function showAdmin() {
+        loginScreen.style.display = 'none';
+        adminScreen.style.display = '';
+        loadDevices();
+      }
+
+      loginForm.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        var pw = passwordInput.value.trim();
+        if (!pw) return;
+
+        loginBtn.disabled = true;
+        loginBtn.textContent = 'Authenticating…';
+        loginError.classList.remove('visible');
+        loginError.textContent = '';
+
+        setPassword(pw);
+
+        try {
+          await fetchDevices(); // verify the password works
+          showAdmin();
+        } catch (err) {
+          clearPassword();
+          loginError.textContent = err.message || 'Authentication failed.';
+          loginError.classList.add('visible');
+          showToast('Authentication failed.', 'error');
+        } finally {
+          loginBtn.disabled = false;
+          loginBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg> Authenticate';
+        }
+      });
+
+      logoutBtn.addEventListener('click', function () {
+        clearPassword();
+        showLogin();
+        showToast('Logged out.', 'success');
+      });
+
+      refreshBtn.addEventListener('click', loadDevices);
+
+      // --- Init ---
+      if (getPassword()) {
+        showAdmin();
+      } else {
+        showLogin();
+      }
+    })();
+  </script>
+</body>
+</html>
