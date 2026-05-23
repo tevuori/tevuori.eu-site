@@ -451,28 +451,8 @@
       function approveDevice(token) { return apiRequest('POST', '/admin/approve', { token: token }); }
       function revokeDevice(token) { return apiRequest('POST', '/admin/revoke', { token: token }); }
 
-      async function renameDevice(token, name) {
-        var pw = getPassword();
-        if (!pw) throw new Error('No password set');
-        var res = await fetch('https://tevuori.eu/api/admin/rename', {
-          method: 'POST',
-          headers: {
-            'X-Admin-Password': pw,
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
-          body: JSON.stringify({ token: token, name: name })
-        });
-        if (!res.ok) {
-          if (res.status === 401 || res.status === 403) {
-            clearPassword();
-            showLogin();
-            throw new Error('Authentication failed. Please log in again.');
-          }
-          var text = '';
-          try { text = await res.text(); } catch (_) {}
-          throw new Error('Rename failed (' + res.status + ')' + (text ? ': ' + text : ''));
-        }
+      function renameDevice(token, name) {
+        return apiRequest('POST', '/admin/rename', { token: token, name: name });
       }
 
       function formatDate(val) {
