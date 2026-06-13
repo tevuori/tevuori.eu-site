@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pochod Smrti — Šumava 2026</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    /* ─── Reset & Base ─────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0d1a0f;
+      --bg2:       #121e14;
+      --bg3:       #182b1a;
+      --border:    #2a3d2c;
+      --accent:    #4caf50;
+      --accent2:   #81c784;
+      --accent-dim:#2e7d32;
+      --text:      #e8f5e9;
+      --text2:     #a5d6a7;
+      --text3:     #558b5a;
+      --danger:    #ef5350;
+      --warn:      #ff9800;
+      --radius:    10px;
+      --shadow:    0 4px 24px rgba(0,0,0,.45);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    /* Noise texture */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      opacity: .4;
+    }
+
+    /* ─── Lock Screen ───────────────────────────────────────────── */
+    #lock-screen {
+      position: fixed; inset: 0; z-index: 1000;
+      background: var(--bg);
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 1.5rem;
+    }
+
+    #lock-screen h1 {
+      font-size: 2rem; font-weight: 700; letter-spacing: -.02em;
+      color: var(--accent2);
+    }
+
+    #lock-screen .skull { font-size: 3.5rem; line-height: 1; }
+
+    #lock-screen p { color: var(--text3); font-size: .9rem; }
+
+    #lock-form {
+      display: flex; flex-direction: column; gap: .75rem; align-items: center;
+      width: 100%; max-width: 320px;
+    }
+
+    #lock-form input {
+      width: 100%;
+      background: var(--bg3);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-size: 1.1rem;
+      padding: .65rem 1rem;
+      text-align: center;
+      letter-spacing: .15em;
+      outline: none;
+      transition: border-color .2s;
+    }
+    #lock-form input:focus { border-color: var(--accent); }
+
+    #lock-error {
+      color: var(--danger); font-size: .85rem; display: none;
+    }
+
+    /* ─── Main Layout ───────────────────────────────────────────── */
+    #app { display: none; position: relative; z-index: 1; }
+
+    header {
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      padding: 1.25rem 2rem;
+      display: flex; align-items: center; gap: 1rem;
+      position: sticky; top: 0; z-index: 100;
+    }
+
+    header .skull-sm { font-size: 1.6rem; }
+
+    header h1 {
+      font-size: 1.3rem; font-weight: 700; letter-spacing: -.02em;
+      color: var(--accent2);
+      flex: 1;
+    }
+
+    header .subtitle {
+      font-size: .78rem; color: var(--text3);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+    }
+
+    /* ─── Section Tabs ──────────────────────────────────────────── */
+    .section-tabs {
+      display: flex; gap: .5rem; margin-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0;
+    }
+
+    .section-tab {
+      background: none; border: none;
+      padding: .6rem 1.1rem .8rem;
+      font-size: .9rem; font-weight: 500;
+      color: var(--text3);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: color .2s, border-color .2s;
+      border-radius: 0;
+    }
+    .section-tab:hover { color: var(--text2); }
+    .section-tab.active {
+      color: var(--accent2);
+      border-bottom-color: var(--accent);
+    }
+
+    .section-panel { display: none; }
+    .section-panel.active { display: block; }
+
+    /* ─── Member Tabs ───────────────────────────────────────────── */
+    .member-tabs {
+      display: flex; gap: .5rem; margin-bottom: 1.5rem; flex-wrap: wrap;
+    }
+
+    .member-tab {
+      background: var(--bg3);
+      border: 1.5px solid var(--border);
+      border-radius: 99px;
+      padding: .4rem 1.1rem;
+      font-size: .88rem; font-weight: 500;
+      color: var(--text3);
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .member-tab:hover { border-color: var(--accent-dim); color: var(--text2); }
+    .member-tab.active {
+      background: var(--accent-dim);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    /* ─── Toolbar ───────────────────────────────────────────────── */
+    .toolbar {
+      display: flex; gap: .6rem; margin-bottom: 1.5rem; flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .toolbar select, .toolbar input[type="text"] {
+      background: var(--bg3);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      padding: .4rem .75rem;
+      font-size: .85rem;
+      outline: none;
+      transition: border-color .2s;
+    }
+    .toolbar select:focus, .toolbar input[type="text"]:focus {
+      border-color: var(--accent);
+    }
+
+    .btn {
+      display: inline-flex; align-items: center; gap: .35rem;
+      padding: .4rem .9rem;
+      border: 1.5px solid transparent;
+      border-radius: var(--radius);
+      font-size: .85rem; font-weight: 500;
+      cursor: pointer;
+      transition: all .15s;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: var(--accent-dim);
+      border-color: var(--accent);
+      color: #fff;
+    }
+    .btn-primary:hover { background: var(--accent); }
+
+    .btn-ghost {
+      background: var(--bg3);
+      border-color: var(--border);
+      color: var(--text2);
+    }
+    .btn-ghost:hover { border-color: var(--accent-dim); color: var(--text); }
+
+    .btn-danger {
+      background: transparent;
+      border-color: transparent;
+      color: var(--danger);
+      padding: .3rem .5rem;
+    }
+    .btn-danger:hover { background: rgba(239,83,80,.12); }
+
+    .btn-edit {
+      background: transparent;
+      border-color: transparent;
+      color: var(--text3);
+      padding: .3rem .5rem;
+    }
+    .btn-edit:hover { color: var(--accent2); }
+
+    /* ─── Category Group ────────────────────────────────────────── */
+    .category-group { margin-bottom: 1.5rem; }
+
+    .category-header {
+      display: flex; align-items: center; gap: .5rem;
+      margin-bottom: .6rem;
+    }
+
+    .category-label {
+      font-size: .7rem;
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--text3);
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: .15rem .5rem;
+    }
+
+    .category-progress {
+      font-size: .75rem; color: var(--text3);
+      margin-left: auto;
+    }
+
+    .category-line {
+      flex: 1; height: 1px;
+      background: var(--border);
+    }
+
+    /* ─── Checklist Items ───────────────────────────────────────── */
+    .checklist { display: flex; flex-direction: column; gap: .45rem; }
+
+    .check-item {
+      display: flex; align-items: center; gap: .75rem;
+      background: var(--bg2);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: .6rem .75rem;
+      transition: border-color .2s, background .2s;
+    }
+    .check-item:hover { border-color: var(--accent-dim); }
+    .check-item.done { background: rgba(46,125,50,.1); }
+    .check-item.done .item-text { text-decoration: line-through; color: var(--text3); }
+
+    .check-item input[type="checkbox"] {
+      appearance: none; -webkit-appearance: none;
+      width: 1.1rem; height: 1.1rem;
+      border: 1.5px solid var(--border);
+      border-radius: 4px;
+      background: var(--bg3);
+      cursor: pointer;
+      flex-shrink: 0;
+      position: relative;
+      transition: all .15s;
+    }
+    .check-item input[type="checkbox"]:checked {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+    .check-item input[type="checkbox"]:checked::after {
+      content: '';
+      position: absolute; top: 1px; left: 4px;
+      width: 5px; height: 9px;
+      border: 2px solid #fff;
+      border-top: none; border-left: none;
+      transform: rotate(45deg);
+    }
+
+    .item-text {
+      flex: 1; font-size: .9rem; word-break: break-word;
+    }
+
+    .item-actions {
+      display: flex; gap: .1rem; opacity: 0; transition: opacity .15s;
+    }
+    .check-item:hover .item-actions { opacity: 1; }
+
+    /* ─── Stats bar ─────────────────────────────────────────────── */
+    .stats-bar {
+      display: flex; gap: 1rem; flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+    }
+
+    .stat-card {
+      background: var(--bg2);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: .6rem 1.1rem;
+      display: flex; flex-direction: column; gap: .1rem;
+      min-width: 110px;
+    }
+
+    .stat-num {
+      font-size: 1.4rem; font-weight: 700;
+      color: var(--accent2);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .stat-label {
+      font-size: .72rem; color: var(--text3); text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+
+    /* ─── Progress bar ──────────────────────────────────────────── */
+    .progress-wrap {
+      background: var(--bg3);
+      border-radius: 99px;
+      height: 6px;
+      overflow: hidden;
+      margin-bottom: 1.5rem;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-dim), var(--accent));
+      border-radius: 99px;
+      transition: width .4s ease;
+    }
+
+    /* ─── Empty state ───────────────────────────────────────────── */
+    .empty-state {
+      text-align: center;
+      padding: 2.5rem 1rem;
+      color: var(--text3);
+      font-size: .9rem;
+    }
+
+    /* ─── Modal ─────────────────────────────────────────────────── */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 500;
+      background: rgba(0,0,0,.65);
+      display: flex; align-items: center; justify-content: center;
+      padding: 1rem;
+    }
+    .modal-overlay.hidden { display: none; }
+
+    .modal {
+      background: var(--bg2);
+      border: 1.5px solid var(--border);
+      border-radius: calc(var(--radius) * 1.5);
+      padding: 1.75rem;
+      width: 100%; max-width: 420px;
+      box-shadow: var(--shadow);
+    }
+
+    .modal h2 { font-size: 1.1rem; margin-bottom: 1.25rem; color: var(--accent2); }
+
+    .form-group { display: flex; flex-direction: column; gap: .35rem; margin-bottom: 1rem; }
+
+    .form-group label { font-size: .8rem; color: var(--text3); }
+
+    .form-group input, .form-group select {
+      background: var(--bg3);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      padding: .55rem .75rem;
+      font-size: .9rem;
+      outline: none;
+      transition: border-color .2s;
+      font-family: inherit;
+    }
+    .form-group input:focus, .form-group select:focus { border-color: var(--accent); }
+
+    .modal-actions { display: flex; gap: .6rem; justify-content: flex-end; margin-top: 1.25rem; }
+
+    /* ─── Map Panel ─────────────────────────────────────────────── */
+    .map-container {
+      border-radius: calc(var(--radius) * 1.5);
+      overflow: hidden;
+      border: 1.5px solid var(--border);
+      box-shadow: var(--shadow);
+      position: relative;
+    }
+
+    .map-container iframe {
+      width: 100%; height: 520px; display: block; border: none;
+    }
+
+    .map-info {
+      background: var(--bg2);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      margin-top: 1rem;
+      font-size: .88rem;
+      color: var(--text2);
+      display: flex; flex-direction: column; gap: .4rem;
+    }
+
+    .map-info a {
+      color: var(--accent2);
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+      transition: border-color .2s;
+    }
+    .map-info a:hover { border-bottom-color: var(--accent2); }
+
+    .map-update-btn {
+      margin-top: 1rem;
+    }
+
+    .map-url-input {
+      width: 100%;
+      background: var(--bg3);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      padding: .55rem .75rem;
+      font-size: .85rem;
+      font-family: 'JetBrains Mono', monospace;
+      outline: none;
+      transition: border-color .2s;
+    }
+    .map-url-input:focus { border-color: var(--accent); }
+
+    /* ─── Category Management ───────────────────────────────────── */
+    .cat-list { display: flex; flex-direction: column; gap: .4rem; margin-bottom: 1rem; }
+
+    .cat-row {
+      display: flex; align-items: center; gap: .5rem;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: .4rem .75rem;
+    }
+    .cat-name { flex: 1; font-size: .9rem; }
+
+    /* ─── Responsive ────────────────────────────────────────────── */
+    @media (max-width: 600px) {
+      header { padding: 1rem; }
+      .container { padding: 1rem .75rem; }
+      .stats-bar { gap: .6rem; }
+      .stat-card { min-width: 90px; }
+      .map-container iframe { height: 350px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ─── Lock Screen ──────────────────────────────────────────── -->
+  <div id="lock-screen">
+    <div class="skull">💀</div>
+    <h1>Pochod Smrti</h1>
+    <p>Šumava 2026 — zadej heslo</p>
+    <form id="lock-form">
+      <input type="password" id="lock-input" placeholder="••••••••" autocomplete="off" />
+      <div id="lock-error">Špatné heslo. Zkus znovu.</div>
+      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;">Vstoupit</button>
+    </form>
+  </div>
+
+  <!-- ─── Main App ─────────────────────────────────────────────── -->
+  <div id="app">
+
+    <header>
+      <span class="skull-sm">💀</span>
+      <div>
+        <h1>Pochod Smrti</h1>
+        <div class="subtitle">Šumava 2026 &nbsp;·&nbsp; 8 dní &nbsp;·&nbsp; NP Šumava</div>
+      </div>
+    </header>
+
+    <div class="container">
+
+      <!-- Section Tabs -->
+      <div class="section-tabs">
+        <button class="section-tab active" data-section="checklist">Checklist</button>
+        <button class="section-tab" data-section="map">Mapa trasy</button>
+        <button class="section-tab" data-section="settings">Nastavení</button>
+      </div>
+
+      <!-- ── CHECKLIST PANEL ──────────────────────────────────── -->
+      <div class="section-panel active" id="panel-checklist">
+
+        <!-- Member Tabs -->
+        <div class="member-tabs">
+          <button class="member-tab active" data-member="Jakub">Jakub</button>
+          <button class="member-tab" data-member="Lukáš">Lukáš</button>
+          <button class="member-tab" data-member="Vítek">Vítek</button>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-bar" id="stats-bar">
+          <div class="stat-card">
+            <span class="stat-num" id="stat-total">0</span>
+            <span class="stat-label">celkem</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-num" id="stat-done">0</span>
+            <span class="stat-label">hotovo</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-num" id="stat-pct">0%</span>
+            <span class="stat-label">splněno</span>
+          </div>
+        </div>
+
+        <div class="progress-wrap">
+          <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+        </div>
+
+        <!-- Toolbar -->
+        <div class="toolbar">
+          <select id="filter-cat">
+            <option value="">Všechny kategorie</option>
+          </select>
+          <label style="display:flex;align-items:center;gap:.4rem;font-size:.85rem;color:var(--text3);cursor:pointer;">
+            <input type="checkbox" id="filter-undone" style="accent-color:var(--accent);cursor:pointer;" />
+            Jen nesplněné
+          </label>
+          <span style="flex:1"></span>
+          <button class="btn btn-primary" id="btn-add-item">+ Přidat položku</button>
+        </div>
+
+        <!-- Items list -->
+        <div id="items-list"></div>
+
+      </div>
+
+      <!-- ── MAP PANEL ────────────────────────────────────────── -->
+      <div class="section-panel" id="panel-map">
+
+        <div class="map-container">
+          <iframe
+            id="map-iframe"
+            src="https://frame.mapy.cz/s/duzehojone"
+            allow="geolocation"
+            loading="lazy"
+            title="Mapa trasy — Šumava 2026"
+          ></iframe>
+        </div>
+
+        <div class="map-info">
+          <strong>Trasa: NP Šumava 2026</strong>
+          <span>Plánovaná trasa bude brzy upřesněna.</span>
+          <a id="map-open-link" href="https://mapy.cz" target="_blank" rel="noopener">Otevřít v Mapy.cz ↗</a>
+        </div>
+
+        <div class="map-update-btn">
+          <p style="font-size:.82rem;color:var(--text3);margin-bottom:.5rem;">Aktualizovat odkaz na mapu (embed URL z Mapy.cz):</p>
+          <div style="display:flex;gap:.6rem;flex-wrap:wrap;">
+            <input type="text" class="map-url-input" id="map-url-input" placeholder="https://frame.mapy.cz/s/..." />
+            <button class="btn btn-primary" id="btn-set-map">Nastavit mapu</button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ── SETTINGS PANEL ───────────────────────────────────── -->
+      <div class="section-panel" id="panel-settings">
+
+        <h2 style="font-size:1rem;color:var(--text2);margin-bottom:1.25rem;">Správa kategorií</h2>
+
+        <div class="toolbar" style="margin-bottom:1rem;">
+          <input type="text" id="new-cat-input" placeholder="Název kategorie..." style="flex:1;background:var(--bg3);border:1.5px solid var(--border);border-radius:var(--radius);color:var(--text);padding:.4rem .75rem;font-size:.85rem;outline:none;" />
+          <button class="btn btn-primary" id="btn-add-cat">+ Přidat</button>
+        </div>
+
+        <div class="cat-list" id="cat-list"></div>
+
+        <div style="margin-top:2rem;border-top:1px solid var(--border);padding-top:1.5rem;">
+          <h2 style="font-size:1rem;color:var(--text2);margin-bottom:.75rem;">Data</h2>
+          <div style="display:flex;gap:.6rem;flex-wrap:wrap;">
+            <button class="btn btn-ghost" id="btn-export">Exportovat JSON</button>
+            <button class="btn btn-ghost" id="btn-import-trigger">Importovat JSON</button>
+            <button class="btn btn-danger" id="btn-clear-all">Smazat vše</button>
+          </div>
+          <input type="file" id="import-file" accept=".json" style="display:none;" />
+        </div>
+
+      </div>
+
+    </div><!-- /container -->
+  </div><!-- /app -->
+
+  <!-- ─── Add / Edit Item Modal ─────────────────────────────────── -->
+  <div class="modal-overlay hidden" id="item-modal">
+    <div class="modal">
+      <h2 id="modal-title">Přidat položku</h2>
+      <div class="form-group">
+        <label>Název položky</label>
+        <input type="text" id="modal-item-name" placeholder="např. Spacák, Mapa, Lékárnička..." />
+      </div>
+      <div class="form-group">
+        <label>Kategorie</label>
+        <select id="modal-item-cat"></select>
+      </div>
+      <div class="form-group">
+        <label>Pro členy</label>
+        <div style="display:flex;gap:.75rem;flex-wrap:wrap;padding:.35rem 0;">
+          <label style="display:flex;align-items:center;gap:.4rem;font-size:.88rem;cursor:pointer;">
+            <input type="checkbox" value="Jakub" class="modal-member-check" style="accent-color:var(--accent);" /> Jakub
+          </label>
+          <label style="display:flex;align-items:center;gap:.4rem;font-size:.88rem;cursor:pointer;">
+            <input type="checkbox" value="Lukáš" class="modal-member-check" style="accent-color:var(--accent);" /> Lukáš
+          </label>
+          <label style="display:flex;align-items:center;gap:.4rem;font-size:.88rem;cursor:pointer;">
+            <input type="checkbox" value="Vítek" class="modal-member-check" style="accent-color:var(--accent);" /> Vítek
+          </label>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" id="modal-cancel">Zrušit</button>
+        <button class="btn btn-primary" id="modal-save">Uložit</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ─── Config ──────────────────────────────────────────────────
+    const PASSWORD = 'kamen';
+    const MEMBERS  = ['Jakub', 'Lukáš', 'Vítek'];
+    const LS_KEY   = 'pochodsmrti_v1';
+    const MAP_KEY  = 'pochodsmrti_map_v1';
+
+    // ─── State ───────────────────────────────────────────────────
+    let state = {
+      categories: ['Oblečení', 'Jídlo', 'Vybavení', 'Dokumenty', 'Ostatní'],
+      items: []
+      // item: { id, name, category, members: ['Jakub',...], checked: {Jakub: false, ...} }
+    };
+
+    let activeMember = 'Jakub';
+    let editingItemId = null;
+
+    // ─── Persistence ─────────────────────────────────────────────
+    function save() {
+      localStorage.setItem(LS_KEY, JSON.stringify(state));
+    }
+
+    function load() {
+      try {
+        const raw = localStorage.getItem(LS_KEY);
+        if (raw) state = JSON.parse(raw);
+      } catch(e) { /* ignore */ }
+    }
+
+    // ─── Lock ────────────────────────────────────────────────────
+    const lockScreen = document.getElementById('lock-screen');
+    const appEl      = document.getElementById('app');
+    const lockForm   = document.getElementById('lock-form');
+    const lockInput  = document.getElementById('lock-input');
+    const lockError  = document.getElementById('lock-error');
+
+    function unlock() {
+      lockScreen.style.display = 'none';
+      appEl.style.display = 'block';
+      init();
+    }
+
+    // Check session
+    if (sessionStorage.getItem('pochod_auth') === '1') {
+      unlock();
+    }
+
+    lockForm.addEventListener('submit', e => {
+      e.preventDefault();
+      if (lockInput.value === PASSWORD) {
+        sessionStorage.setItem('pochod_auth', '1');
+        lockError.style.display = 'none';
+        unlock();
+      } else {
+        lockError.style.display = 'block';
+        lockInput.value = '';
+        lockInput.focus();
+      }
+    });
+
+    // ─── Init ────────────────────────────────────────────────────
+    function init() {
+      load();
+      loadMap();
+      renderCategorySelects();
+      renderCatList();
+      renderItems();
+      bindEvents();
+    }
+
+    // ─── Section tabs ────────────────────────────────────────────
+    function bindEvents() {
+      document.querySelectorAll('.section-tab').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.section-tab').forEach(b => b.classList.remove('active'));
+          document.querySelectorAll('.section-panel').forEach(p => p.classList.remove('active'));
+          btn.classList.add('active');
+          document.getElementById('panel-' + btn.dataset.section).classList.add('active');
+        });
+      });
+
+      // Member tabs
+      document.querySelectorAll('.member-tab').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.member-tab').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          activeMember = btn.dataset.member;
+          renderItems();
+        });
+      });
+
+      // Filters
+      document.getElementById('filter-cat').addEventListener('change', renderItems);
+      document.getElementById('filter-undone').addEventListener('change', renderItems);
+
+      // Add item
+      document.getElementById('btn-add-item').addEventListener('click', () => openModal());
+
+      // Modal
+      document.getElementById('modal-cancel').addEventListener('click', closeModal);
+      document.getElementById('modal-save').addEventListener('click', saveItem);
+      document.getElementById('item-modal').addEventListener('click', e => {
+        if (e.target === e.currentTarget) closeModal();
+      });
+      document.getElementById('modal-item-name').addEventListener('keydown', e => {
+        if (e.key === 'Enter') saveItem();
+      });
+
+      // Categories
+      document.getElementById('btn-add-cat').addEventListener('click', addCategory);
+      document.getElementById('new-cat-input').addEventListener('keydown', e => {
+        if (e.key === 'Enter') addCategory();
+      });
+
+      // Map
+      document.getElementById('btn-set-map').addEventListener('click', setMap);
+      document.getElementById('map-url-input').addEventListener('keydown', e => {
+        if (e.key === 'Enter') setMap();
+      });
+
+      // Data
+      document.getElementById('btn-export').addEventListener('click', exportData);
+      document.getElementById('btn-import-trigger').addEventListener('click', () => {
+        document.getElementById('import-file').click();
+      });
+      document.getElementById('import-file').addEventListener('change', importData);
+      document.getElementById('btn-clear-all').addEventListener('click', clearAll);
+    }
+
+    // ─── Category selects ────────────────────────────────────────
+    function renderCategorySelects() {
+      const filterSel  = document.getElementById('filter-cat');
+      const modalSel   = document.getElementById('modal-item-cat');
+      const filterVal  = filterSel.value;
+      const modalVal   = modalSel.value;
+
+      filterSel.innerHTML  = '<option value="">Všechny kategorie</option>';
+      modalSel.innerHTML   = '';
+
+      state.categories.forEach(cat => {
+        filterSel.innerHTML += `<option value="${esc(cat)}">${esc(cat)}</option>`;
+        modalSel.innerHTML  += `<option value="${esc(cat)}">${esc(cat)}</option>`;
+      });
+
+      if (filterVal) filterSel.value = filterVal;
+      if (modalVal)  modalSel.value  = modalVal;
+    }
+
+    // ─── Render items ─────────────────────────────────────────────
+    function renderItems() {
+      const filterCat   = document.getElementById('filter-cat').value;
+      const filterUndone= document.getElementById('filter-undone').checked;
+      const container   = document.getElementById('items-list');
+
+      // Get items visible to current member
+      let items = state.items.filter(it => it.members.includes(activeMember));
+      if (filterCat)    items = items.filter(it => it.category === filterCat);
+      if (filterUndone) items = items.filter(it => !it.checked[activeMember]);
+
+      // Stats
+      const allForMember = state.items.filter(it => it.members.includes(activeMember));
+      const doneCount    = allForMember.filter(it => it.checked[activeMember]).length;
+      const totalCount   = allForMember.length;
+      const pct          = totalCount ? Math.round(doneCount / totalCount * 100) : 0;
+
+      document.getElementById('stat-total').textContent = totalCount;
+      document.getElementById('stat-done').textContent  = doneCount;
+      document.getElementById('stat-pct').textContent   = pct + '%';
+      document.getElementById('progress-fill').style.width = pct + '%';
+
+      // Group by category
+      const groups = {};
+      state.categories.forEach(cat => { groups[cat] = []; });
+      items.forEach(it => {
+        if (!groups[it.category]) groups[it.category] = [];
+        groups[it.category].push(it);
+      });
+
+      let html = '';
+      let hasAny = false;
+
+      state.categories.forEach(cat => {
+        const catItems = groups[cat] || [];
+        if (!catItems.length) return;
+        hasAny = true;
+
+        const catDone  = catItems.filter(it => it.checked[activeMember]).length;
+        const catTotal = catItems.length;
+
+        html += `
+          <div class="category-group">
+            <div class="category-header">
+              <span class="category-label">${esc(cat)}</span>
+              <span class="category-line"></span>
+              <span class="category-progress">${catDone}/${catTotal}</span>
+            </div>
+            <div class="checklist">
+        `;
+
+        catItems.forEach(it => {
+          const checked = !!it.checked[activeMember];
+          html += `
+            <div class="check-item${checked ? ' done' : ''}" data-id="${it.id}">
+              <input type="checkbox" ${checked ? 'checked' : ''} data-id="${it.id}" />
+              <span class="item-text">${esc(it.name)}</span>
+              <div class="item-actions">
+                <button class="btn btn-edit" title="Upravit" data-edit="${it.id}">✏️</button>
+                <button class="btn btn-danger" title="Smazat" data-delete="${it.id}">🗑</button>
+              </div>
+            </div>
+          `;
+        });
+
+        html += `</div></div>`;
+      });
+
+      if (!hasAny) {
+        html = `<div class="empty-state">Žádné položky${filterCat || filterUndone ? ' pro aktuální filtr' : ''}.<br>Klikni na <strong>+ Přidat položku</strong>.</div>`;
+      }
+
+      container.innerHTML = html;
+
+      // Bind checkbox events
+      container.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+        cb.addEventListener('change', () => toggleItem(cb.dataset.id, cb.checked));
+      });
+
+      // Bind edit/delete
+      container.querySelectorAll('[data-edit]').forEach(btn => {
+        btn.addEventListener('click', () => openModal(btn.dataset.edit));
+      });
+      container.querySelectorAll('[data-delete]').forEach(btn => {
+        btn.addEventListener('click', () => deleteItem(btn.dataset.delete));
+      });
+    }
+
+    // ─── Toggle checkbox ──────────────────────────────────────────
+    function toggleItem(id, checked) {
+      const item = state.items.find(it => it.id === id);
+      if (!item) return;
+      item.checked[activeMember] = checked;
+      save();
+      renderItems();
+    }
+
+    // ─── Delete item ──────────────────────────────────────────────
+    function deleteItem(id) {
+      if (!confirm('Opravdu smazat tuto položku?')) return;
+      state.items = state.items.filter(it => it.id !== id);
+      save();
+      renderItems();
+    }
+
+    // ─── Modal ────────────────────────────────────────────────────
+    function openModal(editId = null) {
+      editingItemId = editId;
+      const modal = document.getElementById('item-modal');
+      const title = document.getElementById('modal-title');
+      const nameInput = document.getElementById('modal-item-name');
+      const catSel    = document.getElementById('modal-item-cat');
+      const memberChecks = document.querySelectorAll('.modal-member-check');
+
+      renderCategorySelects();
+
+      if (editId) {
+        const item = state.items.find(it => it.id === editId);
+        if (!item) return;
+        title.textContent   = 'Upravit položku';
+        nameInput.value     = item.name;
+        catSel.value        = item.category;
+        memberChecks.forEach(cb => {
+          cb.checked = item.members.includes(cb.value);
+        });
+      } else {
+        title.textContent = 'Přidat položku';
+        nameInput.value   = '';
+        if (state.categories.length) catSel.value = state.categories[0];
+        memberChecks.forEach(cb => { cb.checked = true; });
+      }
+
+      modal.classList.remove('hidden');
+      setTimeout(() => nameInput.focus(), 50);
+    }
+
+    function closeModal() {
+      document.getElementById('item-modal').classList.add('hidden');
+      editingItemId = null;
+    }
+
+    function saveItem() {
+      const name = document.getElementById('modal-item-name').value.trim();
+      const cat  = document.getElementById('modal-item-cat').value;
+      const members = [...document.querySelectorAll('.modal-member-check')]
+        .filter(cb => cb.checked).map(cb => cb.value);
+
+      if (!name) { document.getElementById('modal-item-name').focus(); return; }
+      if (!members.length) { alert('Vyber alespoň jednoho člena.'); return; }
+      if (!cat) { alert('Vyber kategorii.'); return; }
+
+      if (editingItemId) {
+        const item = state.items.find(it => it.id === editingItemId);
+        if (item) {
+          item.name     = name;
+          item.category = cat;
+          // Add checked state for new members, remove for removed ones
+          MEMBERS.forEach(m => {
+            if (members.includes(m) && item.checked[m] === undefined) {
+              item.checked[m] = false;
+            } else if (!members.includes(m)) {
+              delete item.checked[m];
+            }
+          });
+          item.members = members;
+        }
+      } else {
+        const checked = {};
+        members.forEach(m => { checked[m] = false; });
+        state.items.push({
+          id: Date.now().toString(36) + Math.random().toString(36).slice(2),
+          name, category: cat, members,
+          checked
+        });
+      }
+
+      save();
+      closeModal();
+      renderItems();
+    }
+
+    // ─── Categories ───────────────────────────────────────────────
+    function addCategory() {
+      const input = document.getElementById('new-cat-input');
+      const name  = input.value.trim();
+      if (!name) return;
+      if (state.categories.includes(name)) {
+        alert('Tato kategorie již existuje.');
+        return;
+      }
+      state.categories.push(name);
+      input.value = '';
+      save();
+      renderCategorySelects();
+      renderCatList();
+      renderItems();
+    }
+
+    function deleteCategory(cat) {
+      const hasItems = state.items.some(it => it.category === cat);
+      if (hasItems) {
+        if (!confirm(`Kategorie "${cat}" obsahuje položky. Opravdu smazat? Položky budou přesunuty do "Ostatní".`)) return;
+        const fallback = state.categories.find(c => c !== cat) || 'Ostatní';
+        state.items.forEach(it => { if (it.category === cat) it.category = fallback; });
+      } else {
+        if (!confirm(`Smazat kategorii "${cat}"?`)) return;
+      }
+      state.categories = state.categories.filter(c => c !== cat);
+      save();
+      renderCategorySelects();
+      renderCatList();
+      renderItems();
+    }
+
+    function renderCatList() {
+      const list = document.getElementById('cat-list');
+      if (!state.categories.length) {
+        list.innerHTML = '<div style="color:var(--text3);font-size:.85rem;padding:.4rem 0;">Žádné kategorie.</div>';
+        return;
+      }
+      list.innerHTML = state.categories.map(cat => `
+        <div class="cat-row">
+          <span class="cat-name">${esc(cat)}</span>
+          <button class="btn btn-danger" style="padding:.25rem .5rem;font-size:.8rem;" data-del-cat="${esc(cat)}">🗑</button>
+        </div>
+      `).join('');
+
+      list.querySelectorAll('[data-del-cat]').forEach(btn => {
+        btn.addEventListener('click', () => deleteCategory(btn.dataset.delCat));
+      });
+    }
+
+    // ─── Map ──────────────────────────────────────────────────────
+    function loadMap() {
+      const saved = localStorage.getItem(MAP_KEY);
+      if (saved) {
+        try {
+          const { embedUrl, openUrl } = JSON.parse(saved);
+          document.getElementById('map-iframe').src = embedUrl;
+          const link = document.getElementById('map-open-link');
+          link.href = openUrl || embedUrl;
+        } catch(e) { /* ignore */ }
+      }
+    }
+
+    function setMap() {
+      const raw = document.getElementById('map-url-input').value.trim();
+      if (!raw) return;
+
+      // Accept both frame.mapy.cz (embed) and regular mapy.cz links
+      let embedUrl = raw;
+      let openUrl  = raw;
+
+      if (raw.includes('mapy.cz') && !raw.includes('frame.mapy.cz')) {
+        // Try to convert share link to embed
+        embedUrl = raw.replace('mapy.cz/', 'frame.mapy.cz/').replace('https://frame.mapy.cz/s/', 'https://frame.mapy.cz/s/');
+        openUrl  = raw;
+      } else if (raw.includes('frame.mapy.cz')) {
+        openUrl = raw.replace('frame.mapy.cz/', 'mapy.cz/');
+      }
+
+      document.getElementById('map-iframe').src = embedUrl;
+      const link = document.getElementById('map-open-link');
+      link.href = openUrl;
+
+      localStorage.setItem(MAP_KEY, JSON.stringify({ embedUrl, openUrl }));
+      document.getElementById('map-url-input').value = '';
+      alert('Mapa aktualizována!');
+    }
+
+    // ─── Export / Import ──────────────────────────────────────────
+    function exportData() {
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'pochodsmrti_checklist.json';
+      a.click();
+    }
+
+    function importData(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        try {
+          const imported = JSON.parse(ev.target.result);
+          if (!imported.items || !imported.categories) throw new Error();
+          if (!confirm('Importovat data? Aktuální data budou přepsána.')) return;
+          state = imported;
+          save();
+          renderCategorySelects();
+          renderCatList();
+          renderItems();
+          alert('Import úspěšný!');
+        } catch(err) {
+          alert('Neplatný soubor.');
+        }
+      };
+      reader.readAsText(file);
+      e.target.value = '';
+    }
+
+    function clearAll() {
+      if (!confirm('Opravdu smazat VŠECHNA data? Tato akce je nevratná.')) return;
+      state = { categories: ['Oblečení', 'Jídlo', 'Vybavení', 'Dokumenty', 'Ostatní'], items: [] };
+      save();
+      renderCategorySelects();
+      renderCatList();
+      renderItems();
+    }
+
+    // ─── Helpers ──────────────────────────────────────────────────
+    function esc(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+  </script>
+</body>
+</html>
